@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Comrule {
+  id            Int       @id @default(autoincrement())
+  applyTo       Int
+  targetId      Int?
+  targetName    String?
+  smaregiCateId Int?
+  comType       Int?
+  rateValue     Int?
+  atiRateValue  Int?
+  taxRate       Int?
+  validDate     DateTime?
+  validTo       DateTime?
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  User        User[]  @relation("roleid")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  fullname String
+  email    String
+  phone    String?
+  roleName String?
+  roleId   Int?
+  role     Role?   @relation("roleid", fields: [roleId], references: [id], onDelete: Cascade)
+
+  Eventhistory Eventhistory[] @relation("donebyuser")
+  Tourinfo     Tourinfo[]     @relation("tourleadid")
+}
+
+model Category {
+  id       Int        @id @default(autoincrement())
+  code     String?
+  name     String?
+  parentId Int?
+  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Cascade)
+  children Category[] @relation("CategoryToCategory")
+  order    Int?
+  tag      String?
+  Product  Product[]  @relation("cateid")
+}
+
+model Product {
+  id       Int       @id @default(autoincrement())
+  code     String?
+  name     String?
+  cateId   Int?
+  category Category? @relation("cateid", fields: [cateId], references: [id], onDelete: Cascade)
+
+  thumbnail   String?
+  taxType     Int?
+  price       Int?
+  memberPrice Int?
+  tag         String?
+  groupId     Int?
+  createdDate DateTime?
+}
+
+model Eventhistory {
+  id            Int     @id @default(autoincrement())
+  eventName     String?
+  apiName       String?
+  doneByUser    Int?
+  createdByUser User?   @relation("donebyuser", fields: [doneByUser], references: [id], onDelete: Cascade)
+
+  createdDate DateTime?
+}
+
+model Tourinfo {
+  id           Int       @id @default(autoincrement())
+  tourCode     String?
+  arriveDate   DateTime?
+  returnDate   DateTime?
+  comTotal     Int?
+  payStatus    Int?
+  paidDate     DateTime?
+  tourLeadId   Int?
+  tourlead     User?     @relation("tourleadid", fields: [tourLeadId], references: [id], onDelete: Cascade)
+  tourLeadName String?
+  tourists     String?
+  transactions String?
+}
